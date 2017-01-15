@@ -38,7 +38,11 @@
 
 function main() {
 
-    var orderRepo = new OrderRepository(); //How the HELL does one iterate through this object?
+    var orderRepo = new OrderRepository();
+
+    // liberal use of console.log and/or debugger; to examine orderRepo object at runtime
+    //console.log(orderRepo);
+    //debugger;
 
     // Initialize variable counts to hold item counts
     var itemCounts = {
@@ -56,5 +60,32 @@ function main() {
       "Item 12": 0
     };
 
+    var orders = orderRepo.getYesterdaysOrders(); // get the orders from the method provided
+
+    /* using the for syntax from 
+       http://stackoverflow.com/questions/11922383/access-process-nested-objects-arrays-or-json */
+    for(let whichOrder = 0, l = orders.length; whichOrder < l; whichOrder++) {
+      
+      for (let whichItem = 0, l = orders[whichOrder].orderLines.length; whichItem < l; whichItem++) {
+        // for each order we want to add each order line to the total
+        var lineItem = orders[whichOrder].orderLines[whichItem];
+        itemCounts[lineItem.itemName] += lineItem.quantity;
+      }
+    }
+
+    /* let's make it an array so we can sort it
+       http://stackoverflow.com/questions/20977381/sort-a-json-array-object-using-javascript-by-value */
+    var array = [];
+    for(a in itemCounts){
+      array.push([a, itemCounts[a]])
+    }
+    array.sort(function(a,b){return a[1] - b[1]});
+    array.reverse(); // we want items ordered the most towards the front
+
+    /* since the solution doesn't much care for the quantity of orders, just the order of them,
+       we can push straight to the ViewModel without an intermediary data object */
+    for(let whichItem = 0, l = array.length; whichItem < l; whichItem++) {
+      displayShelfItemPair('Shelf ' + (whichItem + 1), array[whichItem][0]);
+    }    
 }
-}
+
